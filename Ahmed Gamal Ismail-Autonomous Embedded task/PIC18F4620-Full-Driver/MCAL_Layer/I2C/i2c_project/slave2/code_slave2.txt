@@ -1,0 +1,69 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+static volatile uint8 data_2;
+
+led_t led1 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN0, .led_status = GPIO_LOW};
+
+void int_handler(void){
+    /* Holds clock low (clock stretch) */
+    I2C_CLOCK_STRETCH_CFG();
+    if((SSPSTATbits.R_nW == 0) && (SSPSTATbits.D_nA == 0)){ /* Master Will Write Data, So i need to read it */
+        uint8 dummy_buffer = SSPBUF; /* Read The Last Byte To Clear The Buffer */
+        while(!SSPSTATbits.BF);
+        data_2 = SSPBUF; /* read data */
+    }
+    else if(SSPSTATbits.R_nW == 1){ /* Master needs to read Data, So i need to write it */
+        
+    }
+    else { /* Nothing */ }
+    /* Releases clock */
+    I2C_CLOCK_RELEASE_CFG();
+}
+
+i2c_t i2c_master = {
+    .i2c_cfg.i2c_mode_MAorSL = I2C_SLAVE_MODE,
+    .i2c_cfg.i2c_slave_address = 0x62,
+    .i2c_cfg.i2c_mode_cfg = I2C_SLAVE_MODE_7BIT_ADDRESS,
+    .i2c_cfg.i2c_SMBus_control_en = I2C_SMBus_DISABLE,
+    .i2c_cfg.i2c_slew_rate_en = I2C_SLEW_RATE_DISABLE,
+    .i2c_cfg.i2c_general_call_en = I2C_GENERAL_CALL_DISABLE,
+    .I2C_InterruptHandler = int_handler,
+    .I2C_Report_Receive_Overflow = NULL,
+    .I2C_Report_Write_Collision = NULL
+};
+
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = I2C_Init(&i2c_master);
+    ret = led_initialize(&led1);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        if('b' == data_2){
+            led_turn_on(&led1);
+        }
+        else if('d' == data_2){
+            led_turn_off(&led1); 
+        }
+        else {}
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

@@ -1,0 +1,161 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+void Tx_int_func(void);
+void Rx_int_func(void);
+void Overrun_error_int_solution_func(void);
+void Framing_error_int_solution_func(void);
+
+uint8 my_data;
+volatile uint32 Tx_int_counter = 0;
+volatile uint32 Rx_int_counter = 0;
+
+led_t led1 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN0, .led_status = GPIO_LOW};
+led_t led2 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN1, .led_status = GPIO_LOW};
+
+usart_t usart_obj = {
+    .baudrate = 9600,
+    .baudrate_gen_config = BAUDRATE_ASYNC_8BIT_LOW_SPEED,
+    .usart_tx_cfg.usart_tx_enable = EUSART_ASYNCHRONOUS_TX_ENABLE,
+    .usart_tx_cfg.usart_tx_interrupt_enable = EUSART_ASYNCHRONOUS_INTERRUPT_TX_ENABLE,
+    .usart_tx_cfg.usart_tx_9bit_enable = EUSART_ASYNCHRONOUS_9BIT_TX_DISABLE,
+    .usart_rx_cfg.usart_rx_enable = EUSART_ASYNCHRONOUS_RX_ENABLE,
+    .usart_rx_cfg.usart_rx_interrupt_enable = EUSART_ASYNCHRONOUS_INTERRUPT_RX_ENABLE,
+    .usart_rx_cfg.usart_rx_9bit_enable = EUSART_ASYNCHRONOUS_9BIT_RX_DISABLE,
+    .EUSART_FramingErrorHandler = Framing_error_int_solution_func,
+    .EUSART_OverrunErrorHandler = Overrun_error_int_solution_func,
+    .EUSART_RxDefaultInterruptHandler = Rx_int_func,
+    .EUSART_TxDefaultInterruptHandler = Tx_int_func
+};
+
+void Tx_int_func(void){
+    Tx_int_counter++;
+}
+
+void Rx_int_func(void){
+    Rx_int_counter++;
+    EUSART_ASYNC_ReadByte_WithOutBlocking(&my_data);
+    switch(my_data){
+        case 'a': led_turn_on(&led1); EUSART_ASYNC_WriteString_WithBlocking("Led1 On\r", 8); break;
+        case 'b': led_turn_off(&led1); EUSART_ASYNC_WriteString_WithBlocking("Led1 Off\r", 9); break;
+        case 'c': led_turn_on(&led2); EUSART_ASYNC_WriteString_WithBlocking("Led2 On\r", 8); break;
+        case 'd': led_turn_off(&led2); EUSART_ASYNC_WriteString_WithBlocking("Led2 Off\r", 9); break;
+        default : led_turn_off(&led1); led_turn_off(&led2);
+    }
+}
+
+void Overrun_error_int_solution_func(void){
+    EUSART_ASYNC_Rx_Restart();
+}
+
+void Framing_error_int_solution_func(void){
+    EUSART_ASYNC_ReadByte_WithOutBlocking(&my_data);
+}
+
+uint8 read_data = ZERO_INIT;
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = EUSART_ASYNC_Init(&usart_obj);
+    ret = led_initialize(&led1);
+    ret = led_initialize(&led2);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        
+        
+        /*
+        ret = EUSART_ASYNC_WriteByte_WithBlocking('a');
+        __delay_ms(1000);
+        ret = EUSART_ASYNC_WriteByte_WithBlocking('b');
+        __delay_ms(1000);
+        
+        
+        ret = EUSART_ASYNC_ReadByte_WithBlocking(&read_data);
+        if(E_OK == ret){
+            if('a' == read_data){
+                led_turn_on(&led1);
+                ret = EUSART_ASYNC_WriteString_WithBlocking("Led On\r", 7);
+            }
+            else if('b' == read_data){
+                led_turn_off(&led1);
+                ret = EUSART_ASYNC_WriteString_WithBlocking("Led Off\r", 8);
+            }
+        }
+        else{}
+        */
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}
+==================
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+uint8 data_rec[8];
+
+void Rx_int_func(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ret = EUSART_ASYNC_ReadByte_WithOutBlocking(&data_rec[0]);
+}
+
+void Tx_int_func(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ret = EUSART_ASYNC_ReadByte_WithOutBlocking(&data_rec[0]);
+}
+
+usart_t usart_obj = {
+    .baudrate = 9600,
+    .baudrate_gen_config = BAUDRATE_ASYNC_8BIT_LOW_SPEED,
+    .usart_tx_cfg.usart_tx_enable = EUSART_ASYNCHRONOUS_TX_ENABLE,
+    .usart_tx_cfg.usart_tx_interrupt_enable = EUSART_ASYNCHRONOUS_INTERRUPT_TX_ENABLE,
+    .usart_tx_cfg.usart_tx_9bit_enable = EUSART_ASYNCHRONOUS_9BIT_TX_DISABLE,
+    .usart_rx_cfg.usart_rx_enable = EUSART_ASYNCHRONOUS_RX_ENABLE,
+    .usart_rx_cfg.usart_rx_interrupt_enable = EUSART_ASYNCHRONOUS_INTERRUPT_RX_ENABLE,
+    .usart_rx_cfg.usart_rx_9bit_enable = EUSART_ASYNCHRONOUS_9BIT_RX_DISABLE,
+    .EUSART_FramingErrorHandler = NULL,
+    .EUSART_OverrunErrorHandler = NULL,
+    .EUSART_RxDefaultInterruptHandler = Rx_int_func,
+    .EUSART_TxDefaultInterruptHandler = Tx_int_func
+};
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = EUSART_ASYNC_Init(&usart_obj);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

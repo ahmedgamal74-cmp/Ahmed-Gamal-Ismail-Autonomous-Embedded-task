@@ -1,0 +1,65 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+/*
+led_t led1 = {.port_name = PORTC_INDEX, .pin = GPIO_PIN0, .led_status = GPIO_LOW};
+
+button_t btn_high = {
+    .button_pin.port = PORTC_INDEX,
+    .button_pin.pin = GPIO_PIN7,
+    .button_pin.direction = GPIO_DIRECTION_INPUT,
+    .button_pin.logic = GPIO_LOW,
+    .button_state = BUTTON_RELEASED,
+    .button_connection = BUTTON_ACTIVE_HIGH
+};
+
+relay_t relay_1 = {
+    .relay_port = PORTC_INDEX,
+    .relay_pin = GPIO_PIN0,
+    .relay_status = RELAY_OFF_STATUS
+};
+ 
+dc_motor_t dc_motor_1 = {
+    .dc_motor_pin[0].port = PORTC_INDEX,
+    .dc_motor_pin[0].pin = GPIO_PIN0,
+    .dc_motor_pin[0].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[0].logic = DC_MOTOR_OFF_STATUS,
+    .dc_motor_pin[1].port = PORTC_INDEX,
+    .dc_motor_pin[1].pin = GPIO_PIN1,
+    .dc_motor_pin[1].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[1].logic = DC_MOTOR_OFF_STATUS
+};
+*/
+
+uint8 seg_common_anode_values[10] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90};
+uint8 seg_common_cathode_values[10] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    while(1){
+        //__delay_ms(000);
+        for(int i = 0; i < 10; i++){
+            ret = gpio_port_write_logic(PORTD_INDEX, seg_common_anode_values[i]);
+            for(int c = 0; c < 10; c++){
+                ret = gpio_port_write_logic(PORTC_INDEX, seg_common_anode_values[c]);
+                __delay_ms(250);
+            }
+        }
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ret = gpio_port_direction_intialize(PORTC_INDEX, 0x80);
+    ret = gpio_port_direction_intialize(PORTD_INDEX, 0x80);
+}

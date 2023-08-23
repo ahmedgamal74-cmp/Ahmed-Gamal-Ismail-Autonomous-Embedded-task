@@ -1,0 +1,80 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+volatile uint8 prog_select = 0;
+
+led_t led1 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN0, .led_status = GPIO_LOW};
+led_t led2 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN1, .led_status = GPIO_LOW};
+
+void int0_app_isr(void){
+    prog_select++;
+    Data_EEPROM_WriteByte(0x03FF, prog_select);
+}
+
+interrupt_INTx_t int0_obj = {
+    .EXT_InterruptHandler = int0_app_isr,
+    .edge = INTERRUPT_RISING_EDGE,
+    .priority = INTERRUPT_HIGH_PRIORITY,
+    .source = INTERRUPT_EXTERNAL_INT0,
+    .mcu_pin.port = PORTB_INDEX,
+    .mcu_pin.pin = GPIO_PIN0,
+    .mcu_pin.direction = GPIO_DIRECTION_INPUT
+};
+
+void prog1(void){
+    led_turn_on(&led1);
+    __delay_ms(250);
+    led_turn_off(&led1);
+    __delay_ms(250);
+}
+
+void prog2(void){
+    led_turn_on(&led2);
+    __delay_ms(250);
+    led_turn_off(&led2);
+    __delay_ms(250);
+}
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = Interrupt_INTx_Init(&int0_obj);
+    ret = led_initialize(&led1);
+    ret = led_initialize(&led2);
+    
+    ret = Data_EEPROM_ReadByte(0x03FF, &prog_select);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        if(1 == prog_select){
+            prog1();
+        }
+        else if(2 == prog_select){
+            prog2();
+        }
+        else if(3 == prog_select){
+            led_turn_off(&led2);
+            led_turn_off(&led1);
+            prog_select = 0;
+        }
+        else{
+            led_turn_off(&led2);
+            led_turn_off(&led1);
+        }
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

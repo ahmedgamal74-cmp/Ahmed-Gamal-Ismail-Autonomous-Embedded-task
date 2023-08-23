@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/F:/programming/learn_pic18/application.c</file>
+            <file>file:/F:/programming/learn_pic18/ECU_Layer/ecu_layer_init.c</file>
+            <file>file:/F:/programming/learn_pic18/MCAL_Layer/I2C/hal_i2c.h</file>
+            <file>file:/F:/programming/learn_pic18/MCAL_Layer/Interrupt/mcal_interrupt_gen_cfg.h</file>
+            <file>file:/F:/programming/learn_pic18/application.h</file>
+            <file>file:/F:/programming/learn_pic18/MCAL_Layer/I2C/hal_i2c.c</file>
+        </group>
+    </open-files>
+</project-private>

@@ -1,0 +1,124 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+void adc_int_fun_1(void);
+
+dc_motor_t dc_motor_1 = {
+    .dc_motor_pin[0].port = PORTD_INDEX,
+    .dc_motor_pin[0].pin = GPIO_PIN0,
+    .dc_motor_pin[0].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[0].logic = DC_MOTOR_OFF_STATUS,
+    .dc_motor_pin[1].port = PORTD_INDEX,
+    .dc_motor_pin[1].pin = GPIO_PIN1,
+    .dc_motor_pin[1].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[1].logic = DC_MOTOR_OFF_STATUS
+};
+
+dc_motor_t dc_motor_2 = {
+    .dc_motor_pin[0].port = PORTD_INDEX,
+    .dc_motor_pin[0].pin = GPIO_PIN2,
+    .dc_motor_pin[0].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[0].logic = DC_MOTOR_OFF_STATUS,
+    .dc_motor_pin[1].port = PORTD_INDEX,
+    .dc_motor_pin[1].pin = GPIO_PIN3,
+    .dc_motor_pin[1].direction = GPIO_DIRECTION_OUTPUT,
+    .dc_motor_pin[1].logic = DC_MOTOR_OFF_STATUS
+};
+
+chr_lcd_4bit_t lcd1 = {
+    .lcd_rs.port = PORTC_INDEX, .lcd_rs.pin = GPIO_PIN0,
+    .lcd_rs.direction = GPIO_DIRECTION_OUTPUT, .lcd_rs.logic = GPIO_LOW,
+    
+    .lcd_en.port = PORTC_INDEX, .lcd_en.pin = GPIO_PIN1,
+    .lcd_en.direction = GPIO_DIRECTION_OUTPUT, .lcd_en.logic = GPIO_LOW,
+    
+    .lcd_data[0].port = PORTC_INDEX, .lcd_data[0].pin = GPIO_PIN2,
+    .lcd_data[0].direction = GPIO_DIRECTION_OUTPUT, .lcd_data[0].logic = GPIO_LOW,
+    .lcd_data[1].port = PORTC_INDEX, .lcd_data[1].pin = GPIO_PIN3,
+    .lcd_data[1].direction = GPIO_DIRECTION_OUTPUT, .lcd_data[1].logic = GPIO_LOW,
+    .lcd_data[2].port = PORTC_INDEX, .lcd_data[2].pin = GPIO_PIN4,
+    .lcd_data[2].direction = GPIO_DIRECTION_OUTPUT, .lcd_data[2].logic = GPIO_LOW,
+    .lcd_data[3].port = PORTC_INDEX, .lcd_data[3].pin = GPIO_PIN5,
+    .lcd_data[3].direction = GPIO_DIRECTION_OUTPUT, .lcd_data[3].logic = GPIO_LOW
+};
+
+adc_conf_t adc1 = {
+    .ADC_IterruptHandler = NULL,
+    .acquisition_time = ADC_12_TAD,
+    .adc_channel = ADC_CHANNEL_AN0,
+    .conversion_clock = ADC_CONVERSION_CLOCK_FOSC_DIV_16,
+    .result_format = ADC_RESULT_RIGHT,
+    .voltage_reference = ADC_VOLTAGE_REFERENCE_DISABLE
+};
+
+uint16 lm35_res1 = 0;
+uint16 lm35_res2 = 0;
+
+uint16 lm35_res_cel_mv1 = 0;
+uint16 lm35_res_cel_mv2 = 0;
+
+uint8 lm35_res_txt1[6];
+uint8 lm35_res_txt2[6];
+
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = dc_motor_initialize(&dc_motor_1);
+    ret = dc_motor_initialize(&dc_motor_2);
+    ret = ADC_Init(&adc1);
+    ret = lcd_4bit_initialize(&lcd1);
+    
+    ret = lcd_4bit_send_string_pos(&lcd1, 1, 7, "LM35 TEST");
+    __delay_ms(250);
+    //ret = lcd_4bit_send_command(&lcd1, _LCD_CLEAR);
+    
+    ret = lcd_4bit_send_string_pos(&lcd1, 2, 1, "Temp1: ");
+    ret = lcd_4bit_send_string_pos(&lcd1, 3, 1, "Temp2: ");
+    
+    while(1){
+        //__delay_ms(000);
+        
+        ret = ADC_GetConversion_WithBlocking(&adc1, ADC_CHANNEL_AN0, &lm35_res1);
+        ret = ADC_GetConversion_WithBlocking(&adc1, ADC_CHANNEL_AN1, &lm35_res2);
+        
+        lm35_res_cel_mv1 = lm35_res1 * 4.8828125f;
+        lm35_res_cel_mv1 /= 10;
+        lm35_res_cel_mv2 = lm35_res2 * 4.8828125f;
+        lm35_res_cel_mv2 /= 10;
+        
+        ret = convert_uint16_to_string(lm35_res_cel_mv1, lm35_res_txt1);
+        ret = lcd_4bit_send_string_pos(&lcd1, 2, 8, lm35_res_txt1);
+        
+        ret = convert_uint16_to_string(lm35_res_cel_mv2, lm35_res_txt2);
+        ret = lcd_4bit_send_string_pos(&lcd1, 3, 8, lm35_res_txt2);
+        
+        if(lm35_res_cel_mv1 > 20){
+            ret = dc_motor_move_right(&dc_motor_1);
+        }
+        else{
+            ret = dc_motor_stop(&dc_motor_1);
+        }
+        
+        if(lm35_res_cel_mv2 > 25){
+            ret = dc_motor_move_right(&dc_motor_2);
+        }
+        else{
+            ret = dc_motor_stop(&dc_motor_2);
+        }
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

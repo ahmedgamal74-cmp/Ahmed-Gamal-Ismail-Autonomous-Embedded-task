@@ -1,0 +1,59 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+void tmr0_int_isr(void);
+uint16 tmr0_counter_val= 0;
+
+led_t led1 = {.port_name = PORTD_INDEX, .pin = GPIO_PIN0, .led_status = GPIO_LOW};
+
+timer0_t tmr0_timer = {
+    .TMR0_InterruptHandler = tmr0_int_isr,
+    .prescaler_enable = TIMER0_PRESCAlER_ENABLE_CFG,
+    .prescaler_value = TIMER0_PRESCALER_DEV_BY_8,
+    .priority = INTERRUPT_HIGH_PRIORITY,
+    .timer0_counter_edge = TIMER0_RISING_EDGE_CFG,
+    .timer0_mode = TIMER0_TIMER_MODE,
+    .timer0_preload_value = 3036,
+    .timer0_register_size = TIMER0_16BIT_REGISTER_MODE,
+};
+
+timer0_t tmr0_counter = {
+    .TMR0_InterruptHandler = tmr0_int_isr,
+    .prescaler_enable = TIMER0_PRESCAlER_DISABLE_CFG,
+    .timer0_counter_edge = TIMER0_RISING_EDGE_CFG,
+    .timer0_mode = TIMER0_COUNTER_MODE,
+    .timer0_preload_value = 0,
+    .timer0_register_size = TIMER0_16BIT_REGISTER_MODE,
+};
+
+void tmr0_int_isr(void){
+    led_turn_toggle(&led1);
+}
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    led_initialize(&led1);
+    ret = TIMER0_Init(&tmr0_counter);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        ret = TIMER0_Read_Value(&tmr0_counter, &tmr0_counter_val);
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

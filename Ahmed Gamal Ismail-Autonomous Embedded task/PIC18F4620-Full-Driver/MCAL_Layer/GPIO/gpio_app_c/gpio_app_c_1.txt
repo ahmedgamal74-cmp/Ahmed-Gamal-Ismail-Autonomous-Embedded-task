@@ -1,0 +1,66 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+#define AHMED_LATC       (HWREG8(0xF8B))
+#define AHMED_TRISC      (HWREG8(0xF94))
+
+/*
+#define HWREG8(_x)      (*((volatile uint8 *)(_x)))
+ * 
+ * 
+#define SET_BIT(REG,BIT_POSN)          (REG |= (1 << BIT_POSN))
+#define CLEAR_BIT(REG,BIT_POSN)        (REG &= ~(1 << BIT_POSN))
+#define TOGGLE_BIT(REG,BIT_POSN)       (REG ^= (1 << BIT_POSN))
+*/
+
+typedef union{
+    struct{
+        unsigned SELF_LATC0 : 1;
+        unsigned SELF_LATC1 : 1;
+        unsigned SELF_LATC2 : 1;
+        unsigned SELF_LATC3 : 1;
+        unsigned SELF_LATC4 : 1;
+        unsigned SELF_LATC5 : 1;
+        unsigned SELF_LATC6 : 1;
+        unsigned SELF_LATC7 : 1;
+    };
+    uint8 LATC_REGISTER;
+}SELF_LATC;
+
+#define SELF_LATC_REGISTER (*((volatile SELF_LATC *)0xF8B))
+
+int main() {
+    
+    AHMED_TRISC = 0x00;
+    
+    //SELF_LATC_REGISTER->LATC_REGISTER = 0x55;
+    //SELF_LATC_REGISTER.SELF_LATC0 = 1;
+    
+    //AHMED_LATC = 0x01;
+    
+    //SET_BIT(AHMED_LATC,7);
+    //TOGGLE_BIT(AHMED_LATC,1);
+    //CLEAR_BIT(AHMED_LATC,0);
+    
+    while(1){
+        __delay_ms(0);
+        SELF_LATC_REGISTER.SELF_LATC0 = 1;
+        __delay_ms(50);
+        SELF_LATC_REGISTER.SELF_LATC1 = 1;
+        __delay_ms(50);
+        SELF_LATC_REGISTER.SELF_LATC2 = 1;
+        __delay_ms(50);
+        SELF_LATC_REGISTER.SELF_LATC3 = 1;
+        __delay_ms(50);
+        SELF_LATC_REGISTER.SELF_LATC4 = 1;
+        __delay_ms(50);
+    }
+    
+    return (EXIT_SUCCESS);
+}

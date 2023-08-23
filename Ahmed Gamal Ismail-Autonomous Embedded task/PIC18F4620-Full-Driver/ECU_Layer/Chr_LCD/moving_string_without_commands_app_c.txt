@@ -1,0 +1,45 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+uint8 my_str_1[] = "Embedded Diploma";
+uint8 my_str_2[] = "Loading";
+
+uint8 lcd1_counter = 0;
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = lcd_8bit_send_string_pos(&lcd_2, 1, 1, "Loading");
+    ret = lcd_4bit_send_string_pos(&lcd_1, 2, 1, "Embedded Diploma");
+    
+    while(1){
+        //__delay_ms(000);
+        
+        for(lcd1_counter = 5; lcd1_counter <= 7; lcd1_counter++){
+            ret = lcd_4bit_send_string_pos(&lcd_1, 1, lcd1_counter, "Hello All");
+            __delay_ms(250);
+            ret = lcd_4bit_send_char_data_pos(&lcd_1, 1, lcd1_counter, ' ');
+        }
+        ret = lcd_4bit_send_string_pos(&lcd_1, 1, 5, "           ");
+        
+        for(lcd1_counter = 7; lcd1_counter >= 5; lcd1_counter--){
+            ret = lcd_4bit_send_string_pos(&lcd_1, 1, lcd1_counter, "Hello All");
+            __delay_ms(250);
+            ret = lcd_4bit_send_char_data_pos(&lcd_1, 1, lcd1_counter+8, ' ');
+        }
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

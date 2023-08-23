@@ -1,0 +1,62 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+volatile uint32 Timer_on = 0;
+
+void timer1_callback(void);
+
+void timer1_timer_init(void){
+    timer1_t timer_obj = {
+        .TMR1_InterruptHandler = timer1_callback,
+        .priority = INTERRUPT_LOW_PRIORITY,
+        .timer1_mode = TIMER1_TIMER_MODE,
+        .timer1_reg_rw_mode = TIMER1_RW_REG_16BIT_MODE,
+        .timer1_prescaler_value = TIMER1_PRESCALER_DEV_BY_4,
+        .timer1_preload_value = 15536
+    };
+    TIMER1_Init(&timer_obj);
+}
+
+void timer1_counter_init(void){
+    timer1_t counter_obj = {
+        .TMR1_InterruptHandler = timer1_callback,
+        .priority = INTERRUPT_LOW_PRIORITY,
+        .timer1_mode = TIMER1_COUNTER_MODE,
+        .timer1_counter_mode = TIMER1_SYNC_COUNTER_MODE,
+        .timer1_reg_rw_mode = TIMER1_RW_REG_16BIT_MODE,
+        .timer1_prescaler_value = TIMER1_PRESCALER_DEV_BY_1,
+        .timer1_preload_value = 0
+    };
+    TIMER1_Init(&counter_obj);
+}
+
+void timer1_callback(void){
+    Timer_on++;
+}
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    timer1_timer_init();
+    
+    while(1){
+        //__delay_ms(000);
+        
+        
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

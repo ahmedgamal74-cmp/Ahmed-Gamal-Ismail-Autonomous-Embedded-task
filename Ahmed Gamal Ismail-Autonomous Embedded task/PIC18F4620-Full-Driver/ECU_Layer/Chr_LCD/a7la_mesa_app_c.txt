@@ -1,0 +1,112 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+uint8 my_str[] = "Counter: ";
+uint32 lcd_counter = 222;
+uint8 lcd_counter_txt[11];
+
+const uint8 customChar_1[] = {
+  0x07,
+  0x04,
+  0x1F,
+  0x00,
+  0x04,
+  0x04,
+  0x04,
+  0x04
+};
+
+const uint8 customChar_2[] = {
+  0x00,
+  0x00,
+  0x00,
+  0x07,
+  0x01,
+  0x1F,
+  0x00,
+  0x00
+};
+
+const uint8 customChar_3[] = {
+  0x00,
+  0x02,
+  0x12,
+  0x0A,
+  0x06,
+  0x07,
+  0x08,
+  0x10
+};
+
+const uint8 customChar_4[] = {
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x05,
+  0x07,
+  0x00
+};
+
+const uint8 customChar_5[] = {
+  0x00,
+  0x00,
+  0x00,
+  0x15,
+  0x15,
+  0x1F,
+  0x00,
+  0x00
+};
+
+const uint8 customChar_6[] = {
+  0x00,
+  0x08,
+  0x08,
+  0x08,
+  0x08,
+  0x0F,
+  0x00,
+  0x00
+};
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 17, customChar_1, 0);
+    __delay_ms(200);
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 16, customChar_2, 1);
+    __delay_ms(200);
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 15, customChar_3, 2);
+    __delay_ms(200);
+    
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 13, customChar_4, 3);
+    __delay_ms(200);
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 12, customChar_5, 4);
+    __delay_ms(200);
+    ret = lcd_4bit_send_custom_char(&lcd_1, 2, 11, customChar_6, 5);
+    __delay_ms(200);
+    
+    while(1){
+        //__delay_ms(200);
+        
+        ret = lcd_4bit_send_command(&lcd_1, _LCD_DISPLAY_SHIFT_LEFT);
+        __delay_ms(200);
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

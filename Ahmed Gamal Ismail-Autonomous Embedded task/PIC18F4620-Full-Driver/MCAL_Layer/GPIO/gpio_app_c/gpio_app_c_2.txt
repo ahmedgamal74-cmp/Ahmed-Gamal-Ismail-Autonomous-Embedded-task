@@ -1,0 +1,97 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+pin_config_t led_1 = {
+    .port = PORTC_INDEX,
+    .pin = GPIO_PIN0,
+    .direction = GPIO_DIRECTION_OUTPUT,
+    .logic = GPIO_LOW
+};
+
+pin_config_t led_2 = {
+    .port = PORTC_INDEX,
+    .pin = GPIO_PIN1,
+    .direction = GPIO_DIRECTION_OUTPUT,
+    .logic = GPIO_LOW
+};
+
+pin_config_t led_3 = {
+    .port = PORTC_INDEX,
+    .pin = GPIO_PIN2,
+    .direction = GPIO_DIRECTION_OUTPUT,
+    .logic = GPIO_LOW
+};
+
+pin_config_t btn_1 = {
+    .port = PORTD_INDEX,
+    .pin = GPIO_PIN0,
+    .direction = GPIO_DIRECTION_INPUT,
+    .logic = GPIO_LOW
+};
+
+Std_ReturnType ret = E_NOT_OK;
+direction_t les_1_st = GPIO_DIRECTION_OUTPUT;
+logic_t bnt_1_status;
+uint8 port_dir;
+uint8 port_st;
+
+int main() {
+    application_initialize();
+    while(1){
+        //__delay_ms(00);
+        
+        ret = gpio_port_toggle_logic(PORTC_INDEX);
+        __delay_ms(50);
+        
+        
+        /*
+          
+        ret = gpio_pin_toggle_logic(&led_1);
+        __delay_ms(50);  
+         
+        ret = gpio_pin_read_logic(&btn_1, &bnt_1_status);
+        if(bnt_1_status == GPIO_HIGH){
+            ret = gpio_pin_write_logic(&led_1, GPIO_HIGH);
+        }
+        else{
+            ret = gpio_pin_write_logic(&led_1, GPIO_LOW);
+        }
+        
+        ret = gpio_pin_write_logic(&led_2, GPIO_HIGH);
+        ret = gpio_pin_write_logic(&led_3, GPIO_HIGH);
+        __delay_ms(250);
+        ret = gpio_pin_write_logic(&led_2, GPIO_LOW);
+        ret = gpio_pin_write_logic(&led_3, GPIO_LOW);
+        __delay_ms(250);
+        */
+        
+    }
+    
+    
+    
+    
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    //ret = gpio_pin_intialize(&btn_1);
+    //ret = gpio_pin_intialize(&led_1);
+    //ret = gpio_pin_intialize(&led_2);  
+    //ret = gpio_pin_intialize(&led_3);
+    //ret = gpio_pin_direction_intialize(NULL);
+    ret = gpio_port_direction_intialize(PORTC_INDEX, 0x00);
+    ret = gpio_port_get_direction_status(PORTC_INDEX, &port_dir);
+    
+    ret = gpio_port_write_logic(PORTC_INDEX, 0x55);
+    ret = gpio_port_read_logic(PORTC_INDEX, &port_st);
+    __delay_ms(5000);
+    ret = gpio_port_write_logic(PORTC_INDEX, 0xAA);
+    ret = gpio_port_read_logic(PORTC_INDEX, &port_st);
+    
+}

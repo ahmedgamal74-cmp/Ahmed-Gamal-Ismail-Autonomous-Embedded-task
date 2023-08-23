@@ -1,0 +1,61 @@
+/* 
+ * File:   application.c
+ * Author: user
+ *
+ * Created on June 24, 2023, 3:39 PM
+ */
+
+#include "application.h"
+
+#define slave1 0x60
+#define slave2 0x61
+
+uint8 slave_ack = 0;
+uint32 app_counter = 0;
+
+i2c_t i2c_master = {
+    .i2c_cfg.i2c_mode_MAorSL = I2C_MASTER_MODE,
+    .i2c_cfg.i2c_mode_cfg = I2C_MASTER_MODE_DEFINED_CLOCK,
+    .i2c_cfg.i2c_clock = 100000,
+    .i2c_cfg.i2c_SMBus_control_en = I2C_SMBus_DISABLE,
+    .i2c_cfg.i2c_slew_rate_en = I2C_SLEW_RATE_DISABLE,
+    .I2C_InterruptHandler = NULL,
+    .I2C_Report_Receive_Overflow = NULL,
+    .I2C_Report_Write_Collision = NULL
+};
+
+void I2C_sendByte(uint8 slave_add, uint8 data){
+    I2C_Master_Send_Start(&i2c_master);
+    I2C_Master_Write_Data_WithBlocking(&i2c_master, slave_add, &slave_ack);
+    I2C_Master_Write_Data_WithBlocking(&i2c_master, data, &slave_ack);
+    I2C_Master_Send_Stop(&i2c_master);
+}
+
+int main() {
+    Std_ReturnType ret = E_NOT_OK;
+    application_initialize();
+    
+    ret = I2C_Init(&i2c_master);
+    
+    while(1){
+        //__delay_ms(000);
+        
+        I2C_sendByte(slave1, 'a');
+        __delay_ms(500);
+        I2C_sendByte(slave2, 'b');
+        __delay_ms(500);
+        I2C_sendByte(slave1, 'c');
+        __delay_ms(500);
+        I2C_sendByte(slave2, 'd');
+        __delay_ms(500);
+        app_counter++;
+        
+    }
+
+    return (EXIT_SUCCESS);
+}
+
+void application_initialize(void){
+    Std_ReturnType ret = E_NOT_OK;
+    ecu_layer_initialize();
+}

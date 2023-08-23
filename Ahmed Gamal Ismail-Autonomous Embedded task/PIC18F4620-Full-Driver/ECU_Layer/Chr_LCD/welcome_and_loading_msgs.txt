@@ -1,0 +1,20 @@
+void welcome_msg(void){
+    uint8 l_count = 0;
+    for(l_count = 1; l_count <= 5; l_count++){
+        lcd_4bit_send_string_pos(&lcd_1, 1, 7, "Hello All");
+        lcd_4bit_send_string_pos(&lcd_1, 2, 3, "Embedded Diploma");
+        __delay_ms(400);
+        lcd_4bit_send_command(&lcd_1, _LCD_CLEAR);
+        __delay_ms(400);
+    }
+}
+
+void loading_msg(void){
+    uint8 l_count = 0;
+    lcd_8bit_send_string_pos(&lcd_2, 1, 1, "Loading");
+    for(l_count = 8; l_count <= 10; l_count++){
+        lcd_8bit_send_char_data_pos(&lcd_2, 1, l_count, '.');
+        __delay_ms(200);
+    }
+    lcd_8bit_send_string_pos(&lcd_2, 1, 8, "   ");
+}
